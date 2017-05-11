@@ -1,3 +1,7 @@
+# project specific
+test_images/exercises/vehicles
+test_images/exercises/non-vehicles
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
