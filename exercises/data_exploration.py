@@ -2,18 +2,9 @@ import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
-import glob
+import utils
 
-non_cars_images = glob.glob('../test_images/exercises/non-vehicles/*/*.png')
-cars_images = glob.glob('../test_images/exercises/vehicles/*/*.png')
-cars = []
-notcars = []
-
-for image_path in non_cars_images:
-    notcars.append(image_path)
-
-for image_path in cars_images:
-    cars.append(image_path)
+cars, notcars = utils.get_images()
 
 # Define a function to return some characteristics of the dataset
 def data_look(car_list, notcar_list):
