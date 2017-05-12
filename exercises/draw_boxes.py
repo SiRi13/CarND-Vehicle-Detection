@@ -13,8 +13,10 @@ def draw_boxes(img, bboxes, color=(255, 0, 0), thick=3):
 
     return ret_img
 
+"""
 image = mpimg.imread('../test_images/bbox-example-image.jpg')
 bboxes = [((850, 500), (1100, 675)), ((280, 500), (380, 570))]
 
 result = draw_boxes(image, bboxes)
 plt.imshow(result)
+"""

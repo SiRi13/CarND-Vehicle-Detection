@@ -7,21 +7,24 @@ from skimage.feature import hog
 
 # Define a function to return HOG features and visualization
 def get_hog_features(img, orient, pix_per_cell, cell_per_block, vis=False, feature_vec=True):
+    # Call with two outputs if vis==True
     if vis == True:
-        # Use skimage.hog() to get both features and a visualization
         features, hog_image = hog(img, orientations=orient,
-                                    pixels_per_cell=(pix_per_cell, pix_per_cell),
-                                    cells_per_block=(cell_per_block, cell_per_block),
-                                    visualise=True, feature_vector=feature_vec)
+                                  pixels_per_cell=(pix_per_cell, pix_per_cell),
+                                  cells_per_block=(cell_per_block, cell_per_block),
+                                  transform_sqrt=True,
+                                  visualise=vis, feature_vector=feature_vec)
         return features, hog_image
+    # Otherwise call with one output
     else:
-        # Use skimage.hog() to get features only
-        features, _ = hog(img, orientations=orient,
-                                    pixels_per_cell=(pix_per_cell, pix_per_cell),
-                                    cells_per_block=(cell_per_block, cell_per_block),
-                                    visualise=False, feature_vector=feature_vec)
+        features = hog(img, orientations=orient,
+                       pixels_per_cell=(pix_per_cell, pix_per_cell),
+                       cells_per_block=(cell_per_block, cell_per_block),
+                       transform_sqrt=True,
+                       visualise=vis, feature_vector=feature_vec)
         return features
 
+"""
 cars, notcars = utils.get_images()
 
 # %% Generate a random index to look at a car image
@@ -46,3 +49,4 @@ plt.subplot(122)
 plt.imshow(hog_image, cmap='gray')
 plt.title('HOG Visualization')
 plt.show()
+"""

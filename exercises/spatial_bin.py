@@ -15,10 +15,12 @@ def bin_spatial(img, color_space='RGB', size=(32, 32)):
     # Return the feature vector
     return features
 
+"""
 image = mpimg.imread('../test_images/cutout4.jpg')
 feature_vec = bin_spatial(image, color_space='RGB', size=(32, 32))
 
 # Plot features
 plt.plot(feature_vec)
 plt.title('Spatially Binned Features')
-# plt.show()
+plt.show()
+"""

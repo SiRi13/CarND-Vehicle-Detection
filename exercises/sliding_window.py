@@ -49,6 +49,7 @@ def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
     # Return the list of windows
     return window_list
 
+"""
 image = mpimg.imread('../test_images/bbox-example-image.jpg')
 windows = slide_window(image, x_start_stop=[None, None], y_start_stop=[400, None],
                     xy_window=(128, 128), xy_overlap=(0.5, 0.5))
@@ -56,3 +57,4 @@ windows = slide_window(image, x_start_stop=[None, None], y_start_stop=[400, None
 window_img = draw_boxes.draw_boxes(image, windows, color=(0, 0, 255), thick=6)
 plt.imshow(window_img)
 plt.show()
+"""

@@ -16,6 +16,7 @@ def color_hist(img, nbins=32, bins_range=(0, 256)):
     # Return the individual histograms, bin_centers and feature vector
     return rhist, ghist, bhist, bin_centers, hist_features
 
+"""
 image = mpimg.imread('../test_images/cutout1.jpg')
 rh, gh, bh, bincen, feature_vec = color_hist(image, nbins=32, bins_range=(0, 256))
 
@@ -34,3 +35,4 @@ plt.bar(bincen, bh[0])
 plt.xlim(0, 256)
 plt.title('B Histogram')
 fig.tight_layout()
+"""
