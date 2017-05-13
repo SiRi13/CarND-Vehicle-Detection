@@ -1,15 +1,16 @@
 import cv2
-import utilities as utils
+import numpy as np
+import classes.utilities as utils
 
 class VehicleDetector:
 
-    def __init__(self, clf, sclr, values):
+    def __init__(self, clf, sclr, values, fltr):
         self.classifier = clf
-        self.scalar = sclr
-
+        self.scaler = sclr
+        self.filter = fltr
         self.__init_values__(values)
 
-    def __init_values(self, values):
+    def __init_values__(self, values):
         self.color_space = values['color_space']
         # HoG params
         self.hog_feat = values['hog_feat']
@@ -25,11 +26,13 @@ class VehicleDetector:
         self.hist_feat = values['hist_feat']
         self.hist_bins = values['hist_bins']
 
-    def compute_hog_features(self, image):
+    def compute_hog_features(self, feature_image):
         if self.hog_channel == 'ALL':
+            hog_features = list()
             for channel in range(feature_image.shape[2]):
-                self.hog_features.extend(utils.get_hog_features(feature_image[:,:,channel], self.orientations, self.pix_per_cell, self.cell_per_block,
+                hog_features.append(utils.get_hog_features(feature_image[:,:,channel], self.orientations, self.pix_per_cell, self.cell_per_block,
                                                                 vis=False, feature_vec=False))
+            self.hog_feat = np.array(hog_features)
         else:
             self.hog_features = utils.get_hog_features(feature_image[:, :, self.hog_channel], self.orient, self.pix_per_cell, self.cell_per_block,
                                                         vis=False, feature_vec=False)
@@ -78,3 +81,25 @@ class VehicleDetector:
                 on_windows.append(window)
         #8) Return windows for positive detections
         return on_windows
+
+    def process_frame(self, frame):
+        window_settings = [((360, 504), (64, 64), (0.8, 0.8)),
+                            ((360, 576), (96, 96), (0.8, 0.8)),
+                            ((360, 648), (128, 128), (0.8, 0.8))]
+
+        windows = list()
+        for settings in window_settings:
+            windows += utils.slide_window(frame.shape, y_start_stop=settings[0], xy_window=settings[1], xy_overlap=settings[2])
+
+        # copy frame
+        draw_frame = np.copy(frame)
+        # scale image
+        frame = frame.astype(np.float32) / 255
+        # compute hog features once
+        self.compute_hog_features(frame)
+        # search for vehicles
+        hot_windows = self.search_windows(frame, windows)
+        # filter false-positives and multiple detections
+        draw_frame = self.filter.filter(frame, draw_frame, hot_windows)
+
+        return draw_frame

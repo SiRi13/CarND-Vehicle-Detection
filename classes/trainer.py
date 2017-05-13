@@ -4,7 +4,7 @@ import pickle
 import random
 import sklearn.utils
 import numpy as np
-import utilities as utils
+import classes.utilities as utils
 import matplotlib.image as mpimg
 
 from sklearn.preprocessing import StandardScaler
@@ -49,18 +49,18 @@ class ClassifierTrainer:
             to_persist['spatial_size'] = self.spatial_size
             to_persist['hist_feat'] = self.hist_feat
             to_persist['hist_bins'] = self.hist_bins
-            joblib.dump(to_persist, 'settings/parameters.p')
+            joblib.dump(to_persist, './classes/settings/parameters.p')
 
             to_persist = dict()
             to_persist['classifier'] = self.svc
-            to_persist['scalar'] = self.scaled_X
-            joblib.dump(to_persist, 'settings/svc.p')
+            to_persist['scaler'] = self.X_scaler
+            joblib.dump(to_persist, './classes/settings/svc.p')
 
     def extract_features(self, img_paths):
         # Create a list to append feature vectors to
         features = list()
         # Iterate through the list of images
-        for img in img_paths:
+        for idx, img in enumerate(img_paths):
             img_features = list()
             # Read in each one by one
             image = mpimg.imread(img)
@@ -75,20 +75,23 @@ class ClassifierTrainer:
                 hist_features = utils.color_hist(feature_image, nbins=self.hist_bins)
                 img_features.append(hist_features)
             # Apply  get_hog_features() with vis=False, feature_vec=True
-            if self.hog_feat == True:
-                if self.hog_channel == 'ALL':
-                    hog_features = []
-                    for channel in range(image.shape[2]):
-                        hog_features.append(utils.get_hog_features(feature_image[:,:,channel], self.orientations, self.pix_per_cell,
-                                                                    self.cell_per_block, vis=False, feature_vec=False))
-                    hog_features = np.ravel(hog_features)
-                else:
-                    hog_features = utils.get_hog_features(feature_image[:,:,hog_channel], self.orientations, self.pix_per_cell, self.cell_per_block,
-                                                            vis=False, feature_vec=False)
-                # Append the new feature vector to the features list
-                img_features.append(hog_features)
+            # if self.hog_feat == True:
+            #     if self.hog_channel == 'ALL':
+            #         hog_features = []
+            #         for channel in range(image.shape[2]):
+            #             hog_features.append(utils.get_hog_features(feature_image[:,:,channel], self.orientations, self.pix_per_cell,
+            #                                                         self.cell_per_block, vis=False, feature_vec=True))
+            #         hog_features = np.ravel(hog_features)
+            #     else:
+            #         hog_features = utils.get_hog_features(feature_image[:,:,hog_channel], self.orientations, self.pix_per_cell,
+            #                                                 self.cell_per_block, vis=False, feature_vec=True)
+            #     # Append the new feature vector to the features list
+            #     img_features.append(hog_features)
             # Append the new feature vector to the features list
             features.append(np.concatenate(img_features))
+
+            if idx % (len(img_paths) // 10) == 0:
+                print(idx, ' of ', len(img_paths))
         # Return list of feature vectors
         return features
 
@@ -124,7 +127,3 @@ class ClassifierTrainer:
         # Check the prediction time for a single sample
         t=time.time()
         self.trained = True
-
-trainer = ClassifierTrainer('../test_images/{}/**/*.png')
-trainer.train()
-trainer.export_settings()

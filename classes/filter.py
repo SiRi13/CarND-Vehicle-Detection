@@ -1,4 +1,6 @@
+import cv2
 import collections
+import numpy as np
 from scipy.ndimage.measurements import label
 
 class VehicleFilter:
@@ -38,13 +40,13 @@ class VehicleFilter:
         # Return the image
         return img
 
-    def filter(self, image, windows):
+    def filter(self, frame, draw_frame, windows):
         self.history.append(windows)
-        heatmap = np.zeros_like(image[:, :, 0], dtype=np.float)
+        heatmap = np.zeros_like(frame[:, :, 0], dtype=np.float)
         for bboxes in self.history:
             heatmap = self.add_heat(heatmap, bboxes)
 
         heatmap = self.apply_threshold(heatmap)
 
         labels = label(heatmap)
-        return self.draw_labeled_bboxes(image, labels)
+        return self.draw_labeled_bboxes(draw_frame, labels)
