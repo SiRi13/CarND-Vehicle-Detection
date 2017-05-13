@@ -3,27 +3,27 @@ import utilities as utils
 
 class VehicleDetector:
 
-    def __init__(self, clf, sclr):
+    def __init__(self, clf, sclr, values):
         self.classifier = clf
         self.scalar = sclr
 
-        self.__init_values__()
+        self.__init_values__(values)
 
-    def __init_values(self):
-        self.color_space = cv2.COLOR_RGB2YCrCb # possible values RGB, HSV, LUV, HLS, YUV, YCrCb
+    def __init_values(self, values):
+        self.color_space = values['color_space']
         # HoG params
-        self.hog_feat = True
+        self.hog_feat = values['hog_feat']
         self.hog_features = list()
-        self.orientations = 8
-        self.pix_per_cell = 8
-        self.cell_per_block = 2
-        self.hog_channel = "ALL" # possible values 0, 1, 2 or "ALL"
+        self.orientations = values['orientations']
+        self.pix_per_cell = values['pix_per_cell']
+        self.cell_per_block = values['cell_per_block']
+        self.hog_channel = values['hog_channel']
         # Spatial Binning params
-        self.spatial_feat = True
-        self.spatial_size = (32, 32)
+        self.spatial_feat = values['spatial_feat']
+        self.spatial_size = values['spatial_size']
         # Histogram params
-        self.hist_feat = True
-        self.hist_bins = 16
+        self.hist_feat = values['hist_feat']
+        self.hist_bins = values['hist_bins']
 
     def compute_hog_features(self, image):
         if self.hog_channel == 'ALL':
@@ -38,10 +38,7 @@ class VehicleDetector:
         #1) Define an empty list to receive features
         img_features = []
         #2) Apply color conversion if other than 'RGB'
-        if self.color_space is not None:
-            feature_image = cv2.cvtColor(img, self.color_space)
-        else:
-            feature_image = np.copy(img)
+        feature_image = utils.convert_or_copy(img, self.color_space)
         #3) Compute spatial features if flag is set
         if self.spatial_feat == True:
             spatial_features = utils.bin_spatial(feature_image, size=self.spatial_size)
