@@ -2,6 +2,7 @@
 test_images/vehicles
 test_images/non-vehicles
 
+classes/settings
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
