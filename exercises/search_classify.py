@@ -90,26 +90,26 @@ def search_windows(img, windows, clf, scaler, color_space='RGB',
     #8) Return windows for positive detections
     return on_windows
 
-cars, notcars = utils.get_images('jpeg')
+cars, notcars = utils.get_images('png')
 
 # Reduce the sample size because
 # The quiz evaluator times out after 13s of CPU time
-sample_size = 500
-cars = cars[0:sample_size]
-notcars = notcars[0:sample_size]
+# sample_size = 500
+# cars = cars[0:sample_size]
+# notcars = notcars[0:sample_size]
 
 ### Tweak these parameters and see how the results change.
-color_space = 'YUV' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
-orient = 9  # HOG orientations
+color_space = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+orient = 8  # HOG orientations
 pix_per_cell = 8 # HOG pixels per cell
 cell_per_block = 2 # HOG cells per block
-hog_channel = 1 # Can be 0, 1, 2, or "ALL"
-spatial_size = (16, 16) # Spatial binning dimensions
-hist_bins = 64    # Number of histogram bins
+hog_channel = "ALL" # Can be 0, 1, 2, or "ALL"
+spatial_size = (32, 32) # Spatial binning dimensions
+hist_bins = 16    # Number of histogram bins
 spatial_feat = True # Spatial features on or off
 hist_feat = True # Histogram features on or off
 hog_feat = True # HOG features on or off
-y_start_stop = [400, 700] # Min and max in y to search in slide_window()
+y_start_stop = [375, 650] # Min and max in y to search in slide_window()
 
 car_features = norm_shuffle.extract_features(cars, color_space=color_space,
                                                 spatial_size=spatial_size, hist_bins=hist_bins,
@@ -132,7 +132,7 @@ scaled_X = X_scaler.transform(X)
 # Define the labels vector
 y = np.hstack((np.ones(len(car_features)), np.zeros(len(notcar_features))))
 
-# Split up data into randomized training and test sets
+# %% Split up data into randomized training and test sets
 rand_state = np.random.randint(0, 100)
 X_train, X_test, y_train, y_test = train_test_split(scaled_X, y, test_size=0.2,
                                                     random_state=rand_state)
@@ -152,7 +152,8 @@ print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
 # Check the prediction time for a single sample
 t=time.time()
 
-image = mpimg.imread('../test_images/bbox-example-image.jpg')
+# %% search
+image = mpimg.imread('../test_images/test1.jpg')
 draw_image = np.copy(image)
 
 # Uncomment the following line if you extracted training
@@ -160,37 +161,27 @@ draw_image = np.copy(image)
 # image you are searching is a .jpg (scaled 0 to 255)
 #image = image.astype(np.float32)/255
 
-window_settings = [ ((500, 700), (250, 200), (0, 0)), # close
-                    ((500, 675), (200, 175), (0.5, 0.5)), # intermediate
-                    ((475, 600), (150, 125), (0.5, 0.5)), # intermediate
-                    ((475, 575), (105, 100), (0.5, 0.5)), # intermediate
-                    ((450, 540), (90, 90), (0.5, 0.5)) # far
-                  ]
+windows = sliding_window.slide_window(image, x_start_stop=[None, None],
+                                        y_start_stop=(375, 700), xy_window=(96, 96),
+                                        xy_overlap=(0.5, 0.5))
 
-bboxes = list()
-for win_setting in window_settings:
-    windows = sliding_window.slide_window(image, x_start_stop=[None, None],
-                                            y_start_stop=win_setting[0], xy_window=win_setting[1],
-                                            xy_overlap=win_setting[2])
+hot_windows = search_windows(image, windows, svc, X_scaler, color_space=color_space,
+                                spatial_size=spatial_size, hist_bins=hist_bins,
+                                orient=orient, pix_per_cell=pix_per_cell,
+                                cell_per_block=cell_per_block,
+                                hog_channel=hog_channel, spatial_feat=spatial_feat,
+                                hist_feat=hist_feat, hog_feat=hog_feat)
 
-    hot_windows = search_windows(image, windows, svc, X_scaler, color_space=color_space,
-                                    spatial_size=spatial_size, hist_bins=hist_bins,
-                                    orient=orient, pix_per_cell=pix_per_cell,
-                                    cell_per_block=cell_per_block,
-                                    hog_channel=hog_channel, spatial_feat=spatial_feat,
-                                    hist_feat=hist_feat, hog_feat=hog_feat)
-    if len(hot_windows) > 0:
-        bboxes += hot_windows
-
-window_img = draw_boxes.draw_boxes(draw_image, bboxes, color=(0, 0, 255), thick=6)
+window_img = draw_boxes.draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)
 
 plt.imshow(window_img)
 plt.show()
 
+# %% export boxes
 import pickle
-
 pickle.dump(bboxes, open("bbox_pickle.p", 'wb'))
 
+# %% export parameters
 dist_pickle = dict()
 dist_pickle["svc"] = svc
 dist_pickle["scaler"] = X_scaler

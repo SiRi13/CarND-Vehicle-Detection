@@ -1,8 +1,8 @@
 import glob
 
 def get_images(extension='jpeg'):
-    non_cars_images = glob.glob('../test_images/exercises/non-vehicles/*/*.' + extension)
-    cars_images = glob.glob('../test_images/exercises/vehicles/*/*.' + extension)
+    non_cars_images = glob.glob('../test_images/non-vehicles/**/*.' + extension)
+    cars_images = glob.glob('../test_images/vehicles/**/*.' + extension)
     cars = []
     notcars = []
 

@@ -49,7 +49,7 @@ def draw_labeled_bboxes(img, labels):
 heat = add_heat(heat,box_list)
 
 # Apply threshold to help remove false positives
-heat = apply_threshold(heat,1)
+heat = apply_threshold(heat, 5)
 
 # Visualize the heatmap when displaying
 heatmap = np.clip(heat, 0, 255)
@@ -58,7 +58,7 @@ heatmap = np.clip(heat, 0, 255)
 labels = label(heatmap)
 draw_img = draw_labeled_bboxes(np.copy(image), labels)
 
-fig = plt.figure()
+fig = plt.figure(figsize=(15,10))
 plt.subplot(121)
 plt.imshow(draw_img)
 plt.title('Car Positions')

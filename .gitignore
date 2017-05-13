@@ -1,6 +1,7 @@
 # project specific
-test_images/exercises/vehicles
-test_images/exercises/non-vehicles
+test_images/vehicles
+test_images/non-vehicles
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

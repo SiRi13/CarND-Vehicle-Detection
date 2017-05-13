@@ -12,8 +12,8 @@ import get_hog
 
 # Define a function to extract features from a list of images
 # Have this function call bin_spatial() and color_hist()
-def extract_features(imgs, color_space='RGB', spatial_size=(32, 32), hist_bins=32, orient=9,
-                        pix_per_cell=8, cell_per_block=2, hog_channel=0, hist_range=(0, 256),
+def extract_features(imgs, color_space='RGB', spatial_size=(32, 32), hist_bins=32, hist_range=(0, 256),
+                        orient=9, pix_per_cell=8, cell_per_block=2, hog_channel=0,
                         spatial_feat=True, hist_feat=True, hog_feat=True):
     # Create a list to append feature vectors to
     features = list()
@@ -29,11 +29,11 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32), hist_bins=3
         else:
             feature_image = np.copy(image)
         # Apply bin_spatial() to get spatial color features
-        if spatial_feat:
+        if spatial_feat == True:
             spatial_features = spatial_bin.bin_spatial(feature_image, size=spatial_size)
             img_features.append(spatial_features)
         # Apply color_hist() to get color histogram features
-        if hist_feat:
+        if hist_feat == True:
             _, _, _, _, hist_features = color_hist.color_hist(feature_image, nbins=hist_bins)
             img_features.append(hist_features)
         # Apply  get_hog_features() with vis=False, feature_vec=True
@@ -42,11 +42,11 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32), hist_bins=3
                 hog_features = []
                 for channel in range(image.shape[2]):
                     hog_features.append(get_hog.get_hog_features(feature_image[:,:,channel],
-                                        orient, pix_per_cell, cell_per_block, False, True))
+                                        orient, pix_per_cell, cell_per_block, vis=False, feature_vec=True))
                 hog_features = np.ravel(hog_features)
             else:
                 hog_features = get_hog.get_hog_features(feature_image[:,:,hog_channel], orient,
-                            pix_per_cell, cell_per_block, False, True)
+                            pix_per_cell, cell_per_block, vis=False, feature_vec=True)
             # Append the new feature vector to the features list
             img_features.append(hog_features)
         # Append the new feature vector to the features list
@@ -55,12 +55,27 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32), hist_bins=3
     return features
 
 """
-cars, notcars = utils.get_images()
+cars, notcars = utils.get_images('png')
 
-car_features = extract_features(cars[:1], color_space='RGB', spatial_size=(32, 32),
-                        hist_bins=32, hist_range=(0, 256))
-notcar_features = extract_features(notcars[:1], color_space='RGB', spatial_size=(32, 32),
-                        hist_bins=32, hist_range=(0, 256))
+color_space = 'YUV' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+orient = 11  # HOG orientations
+pix_per_cell = 16 # HOG pixels per cell
+cell_per_block = 2 # HOG cells per block
+hog_channel = "ALL" # Can be 0, 1, 2, or "ALL"
+spatial_size = (16, 16) # Spatial binning dimensions
+hist_bins = 64    # Number of histogram bins
+spatial_feat = False # Spatial features on or off
+hist_feat = False # Histogram features on or off
+hog_feat = True # HOG features on or off
+y_start_stop = [375, 650] # Min and max in y to search in slide_window()
+
+
+car_features = extract_features(cars, color_space=color_space, spatial_size=spatial_size, hist_bins=hist_bins, orient=orient,
+                                pix_per_cell=pix_per_cell, cell_per_block=cell_per_block, hog_channel=hog_channel, spatial_feat=spatial_feat,
+                                hist_feat=hist_feat, hog_feat=hog_feat)
+notcar_features = extract_features(notcars, color_space=color_space, spatial_size=spatial_size, hist_bins=hist_bins, orient=orient,
+                                pix_per_cell=pix_per_cell, cell_per_block=cell_per_block, hog_channel=hog_channel, spatial_feat=spatial_feat,
+                                hist_feat=hist_feat, hog_feat=hog_feat)
 
 if len(car_features) > 0:
     # Create an array stack of feature vectors

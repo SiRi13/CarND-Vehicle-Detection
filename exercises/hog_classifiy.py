@@ -41,20 +41,20 @@ def extract_features(imgs, cspace='RGB', orient=9, pix_per_cell=8, cell_per_bloc
     # Return list of feature vectors
     return features
 
-cars, notcars = utils.get_images()
+cars, notcars = utils.get_images('png')
 
 # Reduce the sample size because HOG features are slow to compute
 # The quiz evaluator times out after 13s of CPU time
-sample_size = 50
-cars = cars[0:sample_size]
-notcars = notcars[0:sample_size]
+# sample_size = 50
+# cars = cars[0:sample_size]
+# notcars = notcars[0:sample_size]
 
 ### TODO: Tweak these parameters and see how the results change.
-colorspace = 'HSV' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
-orient = 9
+colorspace = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+orient = 8
 pix_per_cell = 8
 cell_per_block = 2
-hog_channel = 0 # Can be 0, 1, 2, or "ALL"
+hog_channel = "ALL" # Can be 0, 1, 2, or "ALL"
 
 t=time.time()
 car_features = extract_features(cars, cspace=colorspace, orient=orient,

@@ -11,16 +11,17 @@ from sklearn.model_selection import train_test_split
 import norm_shuffle
 import utils
 
-cars, notcars = utils.get_images()
+cars, notcars = utils.get_images('png')
 
 # TODO play with these values to see how your classifier
 # performs under different binning scenarios
 spatial = 32
-histbin = 32
+histbin = 16
+color_space='YCrCb'
 
-car_features = norm_shuffle.extract_features(cars, cspace='RGB', spatial_size=(spatial, spatial),
+car_features = norm_shuffle.extract_features(cars, color_space=color_space, spatial_size=(spatial, spatial),
                                 hist_bins=histbin, hist_range=(0, 256))
-notcar_features = norm_shuffle.extract_features(notcars, cspace='RGB', spatial_size=(spatial, spatial),
+notcar_features = norm_shuffle.extract_features(notcars, color_space=color_space, spatial_size=(spatial, spatial),
                                     hist_bins=histbin, hist_range=(0, 256))
 
 # Create an array stack of feature vectors
