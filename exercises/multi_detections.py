@@ -11,7 +11,7 @@ from scipy.ndimage.measurements import label
 box_list = pickle.load( open( "bbox_pickle.p", "rb" ))
 
 # Read in image similar to one shown above
-image = mpimg.imread('../test_images/bbox-example-image.jpg')
+image = mpimg.imread('../test_images/test1.jpg')
 heat = np.zeros_like(image[:,:,0]).astype(np.float)
 
 def add_heat(heatmap, bbox_list):
@@ -49,7 +49,7 @@ def draw_labeled_bboxes(img, labels):
 heat = add_heat(heat,box_list)
 
 # Apply threshold to help remove false positives
-heat = apply_threshold(heat, 5)
+heat = apply_threshold(heat, 0.9)
 
 # Visualize the heatmap when displaying
 heatmap = np.clip(heat, 0, 255)
