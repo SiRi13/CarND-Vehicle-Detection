@@ -79,7 +79,8 @@ Ultimately I searched on one scale using YUV 3-channel HOG features without spat
 ![alt text][test2]
 ![alt text][test6]
 
-To improve performance I tried to compute the HoG features only once per image but did not succeed. But reducing the sliding window sizes to one instead of three
+To improve performance I tried to compute the HoG features only once per image but did not succeed.
+Instead I reduced the sliding window sizes to one instead of three different sizes which improved speed a little.
 
 ---
 
