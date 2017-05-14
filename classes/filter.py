@@ -3,6 +3,7 @@ import cv2
 import collections
 import numpy as np
 import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
 from scipy.ndimage.measurements import label
 
 class VehicleFilter:
@@ -30,7 +31,7 @@ class VehicleFilter:
 
     def draw_labeled_bboxes(self, img, labels):
         # Iterate through all detected cars
-        for car_number in range(1, labels[1]):
+        for car_number in range(1, labels[1] + 1):
             # Find pixels with each car_number label value
             nonzero = (labels[0] == car_number).nonzero()
             # Identify x and y values of those pixels
@@ -39,16 +40,26 @@ class VehicleFilter:
             # Define a bounding box based on min/max x and y
             bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
             # Draw the box on the image
-            cv2.rectangle(img, bbox[0], bbox[1], (0, 255, 0), 6)
+            cv2.rectangle(img, bbox[0], bbox[1], (0, 0, 255), 6)
         # Return the image
         return img
 
-    def do_export(self, images, filename, color_map='gray'):
+    def do_export(self, images, filename):
         if self.export == True:
-            fig = plt.figure()
-            for idx in range(1, len(images)+1):
-                plt.subplot(2,3,idx)
-                plt.imshow(images[idx])
+            frame, draw_frame, heatmap, thresh_heatmap, labels, ret_img = images
+            fig = plt.figure(figsize=(15, 10))
+            plt.subplot(2,3,1)
+            plt.imshow(frame)
+            plt.subplot(2,3,2)
+            plt.imshow(draw_frame)
+            plt.subplot(2,3,3)
+            plt.imshow(heatmap, cmap='hot')
+            plt.subplot(2,3,4)
+            plt.imshow(thresh_heatmap, cmap='hot')
+            plt.subplot(2,3,5)
+            plt.imshow(labels, cmap='gray')
+            plt.subplot(2,3,6)
+            plt.imshow(ret_img)
             fig.tight_layout()
             plt.savefig(os.path.join('./output_images/', filename), format='png')
 
@@ -62,13 +73,24 @@ class VehicleFilter:
         for bboxes in self.history:
             heatmap = self.add_heat(heatmap, bboxes)
 
+        if self.export == True:
+            mpimg.imsave(os.path.join('./output_images', 'raw_heatmap.png'), heatmap, format='png', cmap='hot')
+
         thresh_heatmap = self.apply_threshold(heatmap)
+
+        if self.export == True:
+            mpimg.imsave(os.path.join('./output_images', 'thresh_heatmap.png'), thresh_heatmap, format='png', cmap='hot')
 
         labels = label(thresh_heatmap)
 
-        ret_img = self.draw_labeled_bboxes(draw_frame, labels)
+        if self.export == True:
+            mpimg.imsave(os.path.join('./output_images', 'labels.png'), labels[0], format='png', cmap='gray')
 
-        imgs_to_export = [frame, draw_frame, heatmap, thresh_heatmap, labels, ret_img]
+        ret_img = self.draw_labeled_bboxes(draw_frame, labels)
+        if self.export == True:
+            mpimg.imsave(os.path.join('./output_images', 'labeled_bboxes_on.png'), ret_img, format='png')
+
+        imgs_to_export = (frame, draw_frame, heatmap, thresh_heatmap, labels[0], ret_img)
         self.do_export(imgs_to_export, 'filter_combined.png')
 
-        return ret_img
+        return self.draw_labeled_bboxes(draw_frame, labels)

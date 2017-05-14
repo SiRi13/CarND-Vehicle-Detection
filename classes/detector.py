@@ -37,10 +37,10 @@ class VehicleDetector:
                                                                 vis=False, feature_vec=False))
             self.hog_features = np.array(hog_features)
         else:
-            self.hog_features = utils.get_hog_features(img[:, :, self.hog_channel], self.orient, self.pix_per_cell, self.cell_per_block,
+            self.hog_features = utils.get_hog_features(img[:, :, self.hog_channel], self.orientations, self.pix_per_cell, self.cell_per_block,
                                                         vis=False, feature_vec=False)
 
-    def single_img_features(self, img, hog_window, separately=False):
+    def single_img_features(self, img, separately=False):
         #1) Define an empty list to receive features
         img_features = []
         #2) Apply color conversion if other than 'RGB'
@@ -57,13 +57,16 @@ class VehicleDetector:
             img_features.append(hist_features)
         #7) Compute HOG features if flag is set
         if self.hog_feat == True:
+            if self.hog_channel == 'ALL':
+                hog_features = []
+                for channel in range(feature_image.shape[2]):
+                    hog_features.extend(utils.get_hog_features(feature_image[:,:,channel], self.orientations, self.pix_per_cell, self.cell_per_block,
+                                        transform_sqrt=False, vis=False, feature_vec=True))
+            else:
+                hog_features = utils.get_hog_features(feature_image[:,:,self.hog_channel], self.orientations, self.pix_per_cell, self.cell_per_block,
+                                                        transform_sqrt=False, vis=False, feature_vec=True)
             #8) Append features to list
-            hog_start, hog_width = hog_window
-            start_x = hog_start[1]
-            x_width = hog_start[1] + hog_width
-            start_y = hog_start[0]
-            y_height = hog_start[0] + hog_width
-            img_features.append(self.hog_features[:, start_x:x_width, start_y:y_height, :, :, :].ravel())
+            img_features.append(hog_features)
 
         if separately == True:
             return img_features
@@ -74,17 +77,14 @@ class VehicleDetector:
     # Define a function you will pass an image
     # and the list of windows to be searched (output of slide_windows())
     def search_windows(self, img):
-        self.compute_hog_features(img)
         #1) Create an empty list to receive positive detection windows
         on_windows = []
         #2) Iterate over all windows in the list
         for window in self.windows:
             #3) Extract the test window from original image
             test_img = cv2.resize(img[window[0][1]:window[1][1], window[0][0]:window[1][0]], (64, 64))
-            hog_x = (window[0][0] // self.pix_per_cell, window[0][1] // self.pix_per_cell)
-            x_width = (img.shape[1] // self.pix_per_cell) - 1
             #4) Extract features for that window using single_img_features()
-            features = self.single_img_features(test_img, (hog_x, x_width))
+            features = self.single_img_features(test_img)
             #5) Scale extracted features to be fed to classifier
             test_features = self.scaler.transform(np.array(features).reshape(1, -1))
             #6) Predict using your classifier
@@ -96,9 +96,10 @@ class VehicleDetector:
         return on_windows
 
     def get_sliding_windows(self, frame, separately=False):
-        window_settings = [([None, None], (360, 504), (64, 64), (0.8, 0.8)),
-                            ([None, None], (360, 576), (96, 96), (0.6, 0.6)),
-                            ([None, None], (360, 648), (128, 128), (0.5, 0.5))]
+        # window_settings = [([None, None], (360, 504), (64, 64), (0.8, 0.8)),
+        #                     ([None, None], (360, 576), (96, 96), (0.6, 0.6)),
+        #                     ([None, None], (360, 648), (128, 128), (0.5, 0.5))]
+        window_settings = [([None, None], (360, 700), (76, 76), (0.7, 0.7))]
 
         windows = list()
         for settings in window_settings:
@@ -117,9 +118,7 @@ class VehicleDetector:
         # copy frame
         draw_frame = np.copy(frame)
         # scale image
-        frame = frame.astype(np.float32) / 255
-        # compute hog features once
-        self.compute_hog_features(frame)
+        frame = frame.astype(np.float32) / np.max(frame)
         # search for vehicles
         hot_windows = self.search_windows(frame)
         # filter false-positives and multiple detections

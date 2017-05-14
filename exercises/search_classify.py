@@ -3,18 +3,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 import time
+
 from sklearn.svm import LinearSVC
 from sklearn.preprocessing import StandardScaler
 from skimage.feature import hog
 from sklearn.model_selection import train_test_split
 
-import utils
-import spatial_bin
-import color_hist
-import get_hog
-import norm_shuffle
-import sliding_window
-import draw_boxes
+import exercises.utils as utils
+import exercises.spatial_bin as spatial_bin
+import exercises.color_hist as color_hist
+import exercises.get_hog as get_hog
+import exercises.norm_shuffle as norm_shuffle
+import exercises.sliding_window as sliding_window
+import exercises.draw_boxes as draw_boxes
 
 # Define a function to extract features from a single image window
 # This function is very similar to extract_features()
@@ -91,7 +92,7 @@ def search_windows(img, windows, clf, scaler, color_space='RGB',
     return on_windows
 
 # %% training
-cars, notcars = utils.get_images('png')
+cars, notcars = utils.get_images('png', limit=10)
 # Reduce the sample size because
 # The quiz evaluator times out after 13s of CPU time
 # sample_size = 500
@@ -153,7 +154,7 @@ print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
 t=time.time()
 
 # %% searching
-image = mpimg.imread('../test_images/test1.jpg')
+image = mpimg.imread('./test_images/test1.jpg')
 # Uncomment the following line if you extracted training
 # data from .png images (scaled 0 to 1 by mpimg) and the
 # image you are searching is a .jpg (scaled 0 to 255)

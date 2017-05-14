@@ -9,8 +9,8 @@ from sklearn.preprocessing import StandardScaler
 from skimage.feature import hog
 from sklearn.model_selection import train_test_split
 
-import utils
-import get_hog
+import exercises.utils as utils
+import exercises.get_hog as get_hog
 
 def extract_features(imgs, cspace='RGB', orient=9, pix_per_cell=8, cell_per_block=2, hog_channel=0):
     # Create a list to append feature vectors to
@@ -41,7 +41,7 @@ def extract_features(imgs, cspace='RGB', orient=9, pix_per_cell=8, cell_per_bloc
     # Return list of feature vectors
     return features
 
-cars, notcars = utils.get_images('png')
+cars, notcars = utils.get_images('png', limit=10)
 
 # Reduce the sample size because HOG features are slow to compute
 # The quiz evaluator times out after 13s of CPU time
@@ -50,9 +50,9 @@ cars, notcars = utils.get_images('png')
 # notcars = notcars[0:sample_size]
 
 ### TODO: Tweak these parameters and see how the results change.
-colorspace = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
-orient = 8
-pix_per_cell = 8
+colorspace = 'YUV' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+orient = 11
+pix_per_cell = 16
 cell_per_block = 2
 hog_channel = "ALL" # Can be 0, 1, 2, or "ALL"
 

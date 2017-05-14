@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
-import draw_boxes
+import exercises.draw_boxes
 
 # Define a function that takes an image,
 # start and stop positions in both x and y,

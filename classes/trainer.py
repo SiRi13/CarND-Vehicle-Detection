@@ -22,18 +22,18 @@ class ClassifierTrainer:
 
     def __init_values__(self):
         self.trained = False
-        self.color_space = cv2.COLOR_RGB2YCrCb # possible values RGB, HSV, LUV, HLS, YUV, YCrCb
+        self.color_space = cv2.COLOR_RGB2YUV # possible values RGB, HSV, LUV, HLS, YUV, YCrCb
         # HoG params
         self.hog_feat = True
-        self.orientations = 8
-        self.pix_per_cell = 8
+        self.orientations = 11
+        self.pix_per_cell = 16
         self.cell_per_block = 2
         self.hog_channel = "ALL" # possible values 0, 1, 2 or "ALL"
         # Spatial Binning params
-        self.spatial_feat = True
+        self.spatial_feat = False
         self.spatial_size = (32, 32)
         # Histogram params
-        self.hist_feat = True
+        self.hist_feat = False
         self.hist_bins = 16
 
     def export_settings(self):
@@ -42,19 +42,19 @@ class ClassifierTrainer:
             to_persist['color_space'] = self.color_space
             to_persist['hog_feat'] = self.hog_feat
             to_persist['orientations'] = self.orientations
-            to_persist['pix_per_cell'] = self.color_space
+            to_persist['pix_per_cell'] = self.pix_per_cell
             to_persist['cell_per_block'] = self.cell_per_block
             to_persist['hog_channel'] = self.hog_channel
             to_persist['spatial_feat'] = self.spatial_feat
             to_persist['spatial_size'] = self.spatial_size
             to_persist['hist_feat'] = self.hist_feat
             to_persist['hist_bins'] = self.hist_bins
-            joblib.dump(to_persist, './classes/settings/parameters.p')
+            joblib.dump(to_persist, './classes/settings/parameters.p', compress=9)
 
             to_persist = dict()
             to_persist['classifier'] = self.svc
             to_persist['scaler'] = self.X_scaler
-            joblib.dump(to_persist, './classes/settings/svc.p')
+            joblib.dump(to_persist, './classes/settings/svc.p', compress=9)
 
     def extract_features(self, img_paths):
         # Create a list to append feature vectors to
@@ -80,7 +80,7 @@ class ClassifierTrainer:
                     hog_features = []
                     for channel in range(image.shape[2]):
                         hog_features.append(utils.get_hog_features(feature_image[:, :, channel], self.orientations, self.pix_per_cell,
-                                                                    self.cell_per_block, transform_sqrt= True, vis=False, feature_vec=True))
+                                                                    self.cell_per_block, transform_sqrt=False, vis=False, feature_vec=True))
                     hog_features = np.ravel(hog_features)
                 else:
                     hog_features = utils.get_hog_features(feature_image[:,:,hog_channel], self.orientations, self.pix_per_cell,
