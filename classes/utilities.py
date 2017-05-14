@@ -4,20 +4,20 @@ import numpy as np
 
 from skimage.feature import hog as skHog
 
-def convert_or_copy(image, color_space):
+def convert_or_copy(image, color_space, scale=False):
     if color_space is not None:
         feature_image = cv2.cvtColor(image, color_space)
     else:
         feature_image = np.copy(image)
 
-    if np.max(feature_image) > 1.0:
+    if scale == True and np.max(feature_image) > 1.0:
         feature_image = feature_image.astype(np.float32)/255
 
     return feature_image
 
-def get_hog_features(img, orient, pix_per_cell, cell_per_block, vis=False, feature_vec=True):
+def get_hog_features(img, orient, pix_per_cell, cell_per_block, transform_sqrt=True, vis=False, feature_vec=True):
     return skHog(img, orientations=orient, pixels_per_cell=(pix_per_cell, pix_per_cell), cells_per_block=(cell_per_block, cell_per_block),
-                    transform_sqrt=True, visualise=True, feature_vector=feature_vec)
+                    transform_sqrt=transform_sqrt, visualise=vis, feature_vector=feature_vec)
 
 def bin_spatial(img, size=(32, 32)):
     # Use cv2.resize().ravel() to create the feature vector
@@ -33,17 +33,21 @@ def color_hist(img, nbins=32, bins_range=(0.0, 1.0)):
     # return features
     return hist_features
 
-def load_images(glob_path):
+def load_images(glob_path, limit=None):
     non_cars_images = glob.glob(glob_path.format('non-vehicles'))
     cars_images = glob.glob(glob_path.format('vehicles'))
     cars = []
     notcars = []
 
-    for image_path in non_cars_images:
+    for idx, image_path in enumerate(non_cars_images):
         notcars.append(image_path)
+        if limit is not None and idx >= limit-1:
+            break
 
-    for image_path in cars_images:
+    for idx, image_path in enumerate(cars_images):
         cars.append(image_path)
+        if limit is not None and idx >=limit-1:
+            break
 
     return cars, notcars
 
@@ -86,3 +90,13 @@ def slide_window(image_size, x_start_stop=[None, None], y_start_stop=[None, None
 
     # Return the list of windows
     return window_list
+
+def draw_boxes(img, bboxes, color=(255, 0, 0), thick=3):
+    # make copy to draw on
+    ret_img = np.copy(img)
+    # iterate bboxes
+    for box in bboxes:
+        # draw box
+        cv2.rectangle(ret_img, box[0], box[1], color, thick)
+
+    return ret_img

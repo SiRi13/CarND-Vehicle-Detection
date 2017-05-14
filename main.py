@@ -1,6 +1,9 @@
 import os
+import cv2
 import glob
+import numpy as np
 import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
 
 from sklearn.externals import joblib
 from moviepy.video.io.VideoFileClip import VideoFileClip
@@ -8,6 +11,7 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 from classes.trainer import ClassifierTrainer
 from classes.detector import VehicleDetector
 from classes.filter import VehicleFilter
+import classes.utilities as utils
 
 if not (os.path.exists('./classes/settings/parameters.p') and os.path.exists('./classes/settings/svc.p')):
     print('no parameters! start training')
@@ -22,17 +26,16 @@ parameters = joblib.load('./classes/settings/parameters.p')
 svc = joblib.load('./classes/settings/svc.p')
 print('done')
 
-
 # %% test images
 detector = VehicleDetector(svc['classifier'], svc['scaler'], parameters, VehicleFilter(thresh=5.0, hist_len=1))
 print('detect on test images')
 test_images = glob.glob('./test_images/test*.jpg')
 for image in test_images:
     img = mpimg.imread(image)
-    output_image = detector.process_frame(img)
+    output_image = detector.process_frame(img, reset=True)
     out_name = os.path.join('./output_images', os.path.basename(image))
     mpimg.imsave(out_name.replace('jpg', 'png'), output_image, format='png')
-print('done')
+    print('done')
 
 # %% test video
 detector = VehicleDetector(svc['classifier'], svc['scaler'], parameters, VehicleFilter(thresh=10.0, hist_len=10))
@@ -42,3 +45,31 @@ clip = VideoFileClip(video)
 output_clip = clip.fl_image(detector.process_frame)
 output_clip.write_videofile(video_output, audio=False)
 print('done')
+
+# %% project video
+detector = VehicleDetector(svc['classifier'], svc['scaler'], parameters, VehicleFilter(thresh=10.0, hist_len=10))
+video = 'project_video.mp4'
+video_output = './output_videos/' + video
+clip = VideoFileClip(video)
+output_clip = clip.fl_image(detector.process_frame)
+output_clip.write_videofile(video_output, audio=False)
+print('done')
+
+# %% export images for writeup
+detector = VehicleDetector(svc['classifier'], svc['scaler'], parameters, VehicleFilter(thresh=5.0, hist_len=1, export=True))
+img = mpimg.imread('./test_images/test5.jpg')
+draw_img = np.copy(img)
+
+# %% draw sliding windows
+windows = detector.get_sliding_windows(draw_img, separately=True)
+windows0 = utils.draw_boxes(np.copy(img), windows[0], color=(255, 0, 0))
+windows1 = utils.draw_boxes(np.copy(img), windows[1], color=(0, 255, 0))
+windows2 = utils.draw_boxes(np.copy(img), windows[2], color=(0, 0, 255))
+plt.imsave('./output_images/test5_windows0.png', windows0, format='png')
+plt.imsave('./output_images/test5_windows1.png', windows1, format='png')
+plt.imsave('./output_images/test5_windows2.png', windows2, format='png')
+
+# %% process frame
+draw_img = detector.process_frame(draw_img)
+plt.imshow(draw_img)
+plt.show()

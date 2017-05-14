@@ -2,15 +2,16 @@ import cv2
 import time
 import pickle
 import random
-import sklearn.utils
 import numpy as np
-import classes.utilities as utils
 import matplotlib.image as mpimg
+
+import classes.utilities as utils
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
 from sklearn.externals import joblib
+from sklearn.utils import shuffle as skShuffle
 
 class ClassifierTrainer:
 
@@ -24,7 +25,6 @@ class ClassifierTrainer:
         self.color_space = cv2.COLOR_RGB2YCrCb # possible values RGB, HSV, LUV, HLS, YUV, YCrCb
         # HoG params
         self.hog_feat = True
-        self.hog_features = list()
         self.orientations = 8
         self.pix_per_cell = 8
         self.cell_per_block = 2
@@ -75,18 +75,18 @@ class ClassifierTrainer:
                 hist_features = utils.color_hist(feature_image, nbins=self.hist_bins)
                 img_features.append(hist_features)
             # Apply  get_hog_features() with vis=False, feature_vec=True
-            # if self.hog_feat == True:
-            #     if self.hog_channel == 'ALL':
-            #         hog_features = []
-            #         for channel in range(image.shape[2]):
-            #             hog_features.append(utils.get_hog_features(feature_image[:,:,channel], self.orientations, self.pix_per_cell,
-            #                                                         self.cell_per_block, vis=False, feature_vec=True))
-            #         hog_features = np.ravel(hog_features)
-            #     else:
-            #         hog_features = utils.get_hog_features(feature_image[:,:,hog_channel], self.orientations, self.pix_per_cell,
-            #                                                 self.cell_per_block, vis=False, feature_vec=True)
-            #     # Append the new feature vector to the features list
-            #     img_features.append(hog_features)
+            if self.hog_feat == True:
+                if self.hog_channel == 'ALL':
+                    hog_features = []
+                    for channel in range(image.shape[2]):
+                        hog_features.append(utils.get_hog_features(feature_image[:, :, channel], self.orientations, self.pix_per_cell,
+                                                                    self.cell_per_block, transform_sqrt= True, vis=False, feature_vec=True))
+                    hog_features = np.ravel(hog_features)
+                else:
+                    hog_features = utils.get_hog_features(feature_image[:,:,hog_channel], self.orientations, self.pix_per_cell,
+                                                            self.cell_per_block, transform_sqrt=False, vis=False, feature_vec=True)
+                # Append the new feature vector to the features list
+                img_features.append(hog_features)
             # Append the new feature vector to the features list
             features.append(np.concatenate(img_features))
 
@@ -108,7 +108,7 @@ class ClassifierTrainer:
         self.y = np.hstack((np.ones(len(car_features)), np.zeros(len(notcar_features))))
 
         # shuffle sets
-        scaled_X, y = sklearn.utils.shuffle(self.scaled_X, self.y)
+        scaled_X, y = skShuffle(self.scaled_X, self.y)
         # Split up data into randomized training and test sets
         rand_state = np.random.randint(0, 100)
         X_train, X_test, y_train, y_test = train_test_split(self.scaled_X, self.y, test_size=0.2, random_state=rand_state)
