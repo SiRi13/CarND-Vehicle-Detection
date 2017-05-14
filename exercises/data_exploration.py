@@ -2,9 +2,9 @@ import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
-import utils
+import exercises.utils as utils
 
-cars, notcars = utils.get_images()
+cars, notcars = utils.get_images('png')
 
 # Define a function to return some characteristics of the dataset
 def data_look(car_list, notcar_list):
@@ -46,4 +46,5 @@ plt.title('Example Car Image')
 plt.subplot(122)
 plt.imshow(notcar_image)
 plt.title('Example Not-car Image')
+plt.savefig('./output_images/car_not_car.png')
 plt.show()

@@ -5,10 +5,10 @@ import matplotlib.image as mpimg
 
 from sklearn.preprocessing import StandardScaler
 
-import utils
-import color_hist
-import spatial_bin
-import get_hog
+import exercises.utils as utils
+import exercises.color_hist as color_hist
+import exercises.spatial_bin as spatial_bin
+import exercises.get_hog as get_hog
 
 # Define a function to extract features from a list of images
 # Have this function call bin_spatial() and color_hist()
@@ -42,30 +42,30 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32), hist_bins=3
                 hog_features = []
                 for channel in range(image.shape[2]):
                     hog_features.append(get_hog.get_hog_features(feature_image[:,:,channel],
-                                        orient, pix_per_cell, cell_per_block, vis=False, feature_vec=True))
+                                        orient, pix_per_cell, cell_per_block, transform_sqrt= True, vis=False, feature_vec=True))
                 hog_features = np.ravel(hog_features)
             else:
                 hog_features = get_hog.get_hog_features(feature_image[:,:,hog_channel], orient,
                             pix_per_cell, cell_per_block, vis=False, feature_vec=True)
             # Append the new feature vector to the features list
+            print('hog_features: ', hog_features)
             img_features.append(hog_features)
         # Append the new feature vector to the features list
         features.append(np.concatenate(img_features))
     # Return list of feature vectors
     return features
 
-"""
-cars, notcars = utils.get_images('png')
+cars, notcars = utils.get_images('png', limit=10)
 
-color_space = 'YUV' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
-orient = 11  # HOG orientations
-pix_per_cell = 16 # HOG pixels per cell
+color_space = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+orient = 8  # HOG orientations
+pix_per_cell = 8 # HOG pixels per cell
 cell_per_block = 2 # HOG cells per block
 hog_channel = "ALL" # Can be 0, 1, 2, or "ALL"
-spatial_size = (16, 16) # Spatial binning dimensions
-hist_bins = 64    # Number of histogram bins
-spatial_feat = False # Spatial features on or off
-hist_feat = False # Histogram features on or off
+spatial_size = (32, 32) # Spatial binning dimensions
+hist_bins = 16    # Number of histogram bins
+spatial_feat = True # Spatial features on or off
+hist_feat = True # Histogram features on or off
 hog_feat = True # HOG features on or off
 y_start_stop = [375, 650] # Min and max in y to search in slide_window()
 
@@ -98,4 +98,3 @@ if len(car_features) > 0:
     plt.title('Normalized Features')
     fig.tight_layout()
     plt.show()
-"""
